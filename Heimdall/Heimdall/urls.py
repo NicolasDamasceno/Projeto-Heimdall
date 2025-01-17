@@ -20,5 +20,5 @@ from django.urls import path, include
 # Devemos inclui as URLs criadas aqui para que sejem reconhecidas pelo projeto inteiro
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('pages.urls'))
+    path('', include('pages.urls')),
 ]

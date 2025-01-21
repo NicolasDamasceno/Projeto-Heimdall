@@ -1,11 +1,14 @@
 from django.db import models
 from polymorphic.models import PolymorphicModel
+from django.core.exceptions import ValidationError
+from validate_docbr import CPF
+
 
 # Classe Pai Usuários
 class Usuario(PolymorphicModel):
     nome = models.CharField(blank=False, null=False, max_length=200)
-    cpf = models.BigIntegerField(blank=False, null=False)
-    email = models.EmailField(blank=False, null=False, max_length=120)
+    cpf = models.CharField(max_length=11, unique=True)
+    email = models.EmailField(blank=False, null=False, unique=True, max_length=120)
     ALUNO = "AL"
     DOCENTE = "DC"
     VISITANTE = "VT"
@@ -21,16 +24,61 @@ class Usuario(PolymorphicModel):
         choices=TIPO_DE_USUARIO_ESCOLHA,
         default=ALUNO
     )
+
+    def clean(self):
+        cpf_validator = CPF()
+        if not cpf_validator.validate(str(self.cpf)):
+            raise ValidationError({'cpf': 'CPF inválido'})
+
     def __str__(self):
         return f'{self.nome}'
+    
+
+class Curso(models.Model):
+    nome = models.CharField(max_length=100, unique=True)
+    turno = models.CharField(
+        max_length=20,
+        choices=[
+            ('manha', 'Manhã'),
+            ('tarde', 'Tarde'),
+            ('noite', 'Noite'),
+        ]
+    )
+
+    def __str__(self):
+        return f'{self.nome} ({self.turno})'
 
 
 # Classe Filha Aluno, herda as prpoiedades de usuario e acrescenta 2 novas
 class Aluno(Usuario):
-    matricula = models.CharField(blank=False,null=False, max_length=15)
-    curso = models.CharField(blank=False, null=False, max_length=60)
+    matricula = models.CharField(blank=False, null=False, unique=True, max_length=15)
+    curso = models.ForeignKey(Curso, on_delete=models.PROTECT)
+    SITUACAO_CHOICES = [
+        ('Deferida', 'Deferida'),
+        ('Indeferida', 'Indeferida'),
+    ]
+    situacao_matricula = models.CharField(
+        max_length=10,
+        choices=SITUACAO_CHOICES,
+        default='Deferida'
+    )
+
+    def clean(self):
+        super().clean()
+        if len(self.matricula) != 15:
+            raise ValidationError({'matricula': 'Matrícula deve ter exatamente 15 dígitos.'})
+
     def __str__(self):
-        return f'{self.nome} - {self.curso}'
+        return f'{self.nome} - {self.curso.nome}'
+    
+    def save(self, *args, **kwargs):
+        curso_nome = self.curso.nome
+        curso_turno = self.curso.turno
+
+        curso, created = Curso.objects.get_or_create(nome=curso_nome, turno=curso_turno)
+        self.curso = curso
+
+        super().save(*args, **kwargs)
 
 
 # Classe Filha Docente

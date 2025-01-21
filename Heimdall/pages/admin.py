@@ -1,23 +1,32 @@
 from django.contrib import admin
-from pages.models import Aluno, Docente, Visitante, Entrada, Dispositivo
+from pages.models import Aluno, Curso, Docente, Visitante, Entrada, Dispositivo
 # Register your models here.
 
 @admin.register(Aluno)
 class AlunoAdmin(admin.ModelAdmin):
     search_fields = ('nome','cpf', 'matricula', 'email')
-    list_display = ('nome', 'curso')
+    list_display = ('nome', 'cpf', 'matricula', 'curso', 'situacao_matricula')
+    exclude = ('tipo_usuario',)
+
+
+@admin.register(Curso)
+class CursoAdmin(admin.ModelAdmin):
+    search_fields = ('nome',)
+    list_display = ('nome', 'turno')
 
 
 @admin.register(Docente)
 class DocenteAdmin(admin.ModelAdmin):
     search_fields = ('nome', 'cpf', 'email')
     list_display = ('nome', 'departamento')
+    exclude = ('tipo_usuario',)
 
 
 @admin.register(Visitante)
 class VisitanteAdmin(admin.ModelAdmin):
     search_fields = ('nome', 'cpf', 'email')
     list_display = ('nome', 'motivo_visita')
+    exclude = ('tipo_usuario',)
 
 
 @admin.register(Dispositivo)

@@ -38,4 +38,4 @@ class DispositivoAdmin(admin.ModelAdmin):
 @admin.register(Entrada)
 class EntradaAdmin(admin.ModelAdmin):
     search_fields = ('data_entrada',)
-    list_display = ('data_entrada',)
+    list_display = ('id_usuario', 'dispositivo', 'data_entrada',)

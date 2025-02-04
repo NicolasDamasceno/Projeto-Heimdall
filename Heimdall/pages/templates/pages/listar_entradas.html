@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Registros de Entrada{% endblock %}
+
+{% block content %}
+<h2>Registros de Entrada</h2>
+<table>
+    <tr>
+        <th>Usuário</th>
+        <th>Localização</th>
+        <th>Data</th>
+    </tr>
+    {% for entrada in entradas %}
+    <tr>
+        <td>{{ entrada.id_usuario.nome }}</td>
+        <td>{{ entrada.dispositivo.localizacao }}</td>
+        <td>{{ entrada.data_entrada }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

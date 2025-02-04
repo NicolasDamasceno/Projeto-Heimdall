@@ -1,8 +1,32 @@
-from django.db import models
+from django.db import migrations, models
 from polymorphic.models import PolymorphicModel
 from django.core.exceptions import ValidationError
 from validate_docbr import CPF
 
+
+def create_default_dispositivo(apps, schema_editor):
+    Dispositivo = apps.get_model('pages', 'Dispositivo')
+    default_dispositivo = Dispositivo.objects.create(tipo_dispositivo='Padrão', localizacao='Desconhecida')
+    Entrada = apps.get_model('pages', 'Entrada')
+    for entrada in Entrada.objects.all():
+        entrada.dispositivo = default_dispositivo
+        entrada.save()
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('pages', 'previous_migration_file'),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name='entrada',
+            name='dispositivo',
+            field=models.ForeignKey(default=1, to='pages.Dispositivo', on_delete=models.CASCADE),
+            preserve_default=False,
+        ),
+        migrations.RunPython(create_default_dispositivo),
+    ]
 
 # Classe Pai Usuários
 class Usuario(PolymorphicModel):
@@ -112,13 +136,14 @@ class Dispositivo(models.Model):
         default=CATRACA
     )
     def __str__(self):
-        return f'{self.tipo_dispositivo}'
+        return f'{self.localizacao}'
 
 
 # Classe que irá validar a entrada das pessoas ao entrar
 class Entrada(models.Model):
     id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     data_entrada = models.DateTimeField(auto_now_add=True)
+    dispositivo = models.ForeignKey(Dispositivo, on_delete=models.CASCADE)
     def __str__(self):
-        return f'{self.id_usuario} - {self.data_entrada}'
+        return f'{self.id_usuario} - {self.data_entrada} - {self.dispositivo}'
 

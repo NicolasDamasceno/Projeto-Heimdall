@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Validar Entrada{% endblock %}
+
+{% block content %}
+<h2>Validar Entrada</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Validar</button>
+</form>
+
+{% if errors %}
+    <ul>
+    {% for field, error_list in errors.items %}
+        <li>{{ field }}: {{ error_list|join:", " }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

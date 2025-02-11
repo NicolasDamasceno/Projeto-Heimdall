@@ -10,11 +10,16 @@
 <body>
     <header>
         <h1>Heimdall - Controle de Acesso</h1>
+        {% if user.is_authenticated %}
         <nav>
             <a href="{% url 'index' %}">Início</a>
             <a href="{% url 'validar_entrada' %}">Validar Entrada</a>
             <a href="{% url 'listar_entradas' %}">Registros</a>
+            <a href="{% url 'cadastrar_visitante' %}">Cadastrar Visitante</a>
+            <a href="{% url 'change_password' %}">Alterar Senha</a>
+            <button id="logout-button" style="color: red;">Logout</button>
         </nav>
+        {% endif %}
     </header>
     <main>
         {% block content %}{% endblock %}
@@ -22,5 +27,49 @@
     <footer>
         <p>© 2025 - Heimdall</p>
     </footer>
+    {% if user.is_authenticated %}
+    <!-- Modal de Logout (invisível por padrão) -->
+    <div id="logout-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>Tem certeza de que quer encerrar a sessão?</p>
+            <button id="confirm-logout">Sim</button>
+            <button id="cancel-logout">Não</button>
+        </div>
+    </div>
+    {% endif %}
+    {% block extra_js %}
+    {% if user.is_authenticated %}
+    <script>
+        var modal = document.getElementById("logout-modal");
+        var btn = document.getElementById("logout-button");
+        var span = document.getElementsByClassName("close")[0];
+        var confirmLogout = document.getElementById("confirm-logout");
+        var cancelLogout = document.getElementById("cancel-logout");
+
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        cancelLogout.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        confirmLogout.onclick = function() {
+            window.location.href = "{% url 'logout' %}";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+    {% endif %}
+    {% endblock %}
 </body>
 </html>

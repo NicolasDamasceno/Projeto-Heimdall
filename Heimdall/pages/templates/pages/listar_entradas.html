@@ -4,18 +4,78 @@
 
 {% block content %}
 <h2>Registros de Entrada</h2>
-<table>
-    <tr>
-        <th>Usuário</th>
-        <th>Localização</th>
-        <th>Data</th>
-    </tr>
-    {% for entrada in entradas %}
-    <tr>
-        <td>{{ entrada.id_usuario.nome }}</td>
-        <td>{{ entrada.dispositivo.localizacao }}</td>
-        <td>{{ entrada.data_entrada }}</td>
-    </tr>
-    {% endfor %}
-</table>
+
+<form method="get" action=".">
+    <label for="data_inicial">Data Inicial:</label>
+    <input type="date" id="data_inicial" name="data_inicial" value="{{ request.GET.data_inicial }}">
+
+    <label for="data_final">Data Final:</label>
+    <input type="date" id="data_final" name="data_final" value="{{ request.GET.data_final }}">
+
+    <label for="nome">Buscar por Nome:</label>
+    <input type="text" id="nome" name="nome" placeholder="Buscar por nome" value="{{ request.GET.nome }}">
+
+    <label for="matricula">Buscar por Matrícula:</label>
+    <input type="text" id="matricula" name="matricula" placeholder="Buscar por matrícula" value="{{ request.GET.matricula }}">
+
+    <label for="dispositivo">Buscar por Dispositivo:</label>
+    <input type="text" id="dispositivo" name="dispositivo" placeholder="Buscar por dispositivo" value="{{ request.GET.dispositivo }}">
+
+    <label>
+        <input type="radio" name="tipo_usuario" value="estudante" {% if request.GET.tipo_usuario == 'estudante' %}checked{% endif %}> Estudante
+    </label>
+    <label>
+        <input type="radio" name="tipo_usuario" value="visitante" {% if request.GET.tipo_usuario == 'visitante' %}checked{% endif %}> Visitante
+    </label>
+
+    <button type="submit">Filtrar</button>
+    <a href="{% url 'listar_entradas' %}" class="button">Limpar Filtros</a>
+    <a href="{% url 'exportar_csv' %}" class="button">Exportar CSV</a>
+</form>
+
+<div class="table-container">
+    <table>
+        <tr>
+            <th>Usuário</th>
+            <th>Matrícula</th>
+            <th>Dispositivo</th>
+            <th>Data</th>
+            <th>Ações</th>
+        </tr>
+        {% for entrada in page_obj %}
+        <tr>
+            <td>{{ entrada.id_usuario.nome }}</td>
+            <td>
+                {% if entrada.id_usuario.polymorphic_ctype.model == 'aluno' %}
+                    {{ entrada.id_usuario.aluno.matricula }}
+                {% else %}
+                    Visitante
+                {% endif %}
+            </td>
+            <td>{{ entrada.dispositivo.localizacao }}</td>
+            <td>{{ entrada.data_entrada|date:"d/m/Y H:i" }}</td>
+            <td>
+                <a href="{% url 'excluir_entrada' entrada.id %}">Excluir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?{% if request.GET.nome %}nome={{ request.GET.nome }}&{% endif %}{% if request.GET.matricula %}matricula={{ request.GET.matricula }}&{% endif %}{% if request.GET.dispositivo %}dispositivo={{ request.GET.dispositivo }}&{% endif %}{% if request.GET.data_inicial %}data_inicial={{ request.GET.data_inicial }}&{% endif %}{% if request.GET.data_final %}data_final={{ request.GET.data_final }}&{% endif %}{% if request.GET.tipo_usuario %}tipo_usuario={{ request.GET.tipo_usuario }}&{% endif %}page=1">&laquo; Primeira</a>
+            <a href="?{% if request.GET.nome %}nome={{ request.GET.nome }}&{% endif %}{% if request.GET.matricula %}matricula={{ request.GET.matricula }}&{% endif %}{% if request.GET.dispositivo %}dispositivo={{ request.GET.dispositivo }}&{% endif %}{% if request.GET.data_inicial %}data_inicial={{ request.GET.data_inicial }}&{% endif %}{% if request.GET.data_final %}data_final={{ request.GET.data_final }}&{% endif %}{% if request.GET.tipo_usuario %}tipo_usuario={{ request.GET.tipo_usuario }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?{% if request.GET.nome %}nome={{ request.GET.nome }}&{% endif %}{% if request.GET.matricula %}matricula={{ request.GET.matricula }}&{% endif %}{% if request.GET.dispositivo %}dispositivo={{ request.GET.dispositivo }}&{% endif %}{% if request.GET.data_inicial %}data_inicial={{ request.GET.data_inicial }}&{% endif %}{% if request.GET.data_final %}data_final={{ request.GET.data_final }}&{% endif %}{% if request.GET.tipo_usuario %}tipo_usuario={{ request.GET.tipo_usuario }}&{% endif %}page={{ page_obj.next_page_number }}">Próxima</a>
+            <a href="?{% if request.GET.nome %}nome={{ request.GET.nome }}&{% endif %}{% if request.GET.matricula %}matricula={{ request.GET.matricula }}&{% endif %}{% if request.GET.dispositivo %}dispositivo={{ request.GET.dispositivo }}&{% endif %}{% if request.GET.data_inicial %}data_inicial={{ request.GET.data_inicial }}&{% endif %}{% if request.GET.data_final %}data_final={{ request.GET.data_final }}&{% endif %}{% if request.GET.tipo_usuario %}tipo_usuario={{ request.GET.tipo_usuario }}&{% endif %}page={{ page_obj.paginator.num_pages }}">Última &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+
 {% endblock %}

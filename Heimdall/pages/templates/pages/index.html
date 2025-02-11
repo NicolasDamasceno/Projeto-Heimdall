@@ -3,6 +3,100 @@
 {% block title %}Início{% endblock %}
 
 {% block content %}
-<h2>Bem-vindo ao Heimdall</h2>
-<p>Sistema de controle de acesso para o IFPI</p>
+{% if user.is_authenticated %}
+    <div class="dashboard">
+        <h2>Bem-vindo(a) ao Heimdall, {{ user.username }}</h2>
+        <p>Sistema de controle de acesso para o IFPI</p>
+        <div id="relogio" class="clock"></div>
+    </div>
+
+    <div class="insights">
+        <h3>Insights</h3>
+        <ul>
+            <li>Total de Alunos: {{ total_alunos }}</li>
+            <li>Total de Docentes: {{ total_docentes }}</li>
+            <li>Total de Visitantes: {{ total_visitantes }}</li>
+            <li>Entradas de Hoje: {{ entradas_hoje }}</li>
+        </ul>
+    </div>
+
+    <div class="menu-lateral">
+        <h3>Opções de Cadastro</h3>
+        <ul>
+            <li><button type="button" onclick="mostrarFormulario('adminForm')">👤 Cadastrar Admin</button></li>
+            <li><button type="button" onclick="mostrarFormulario('alunoForm')">🎓 Cadastrar Aluno</button></li>
+            <li><button type="button" onclick="mostrarFormulario('cursoForm')">📚 Cadastrar Curso</button></li>
+            <li><button type="button" onclick="mostrarFormulario('docenteForm')">👨‍🏫 Cadastrar Docente</button></li>
+            <li><button type="button" onclick="mostrarFormulario('dispositivoForm')">💻 Cadastrar Dispositivo</button></li>
+        </ul>
+    </div>
+    
+    <div class="form-container">
+        {% for form_name, form in forms.items %}
+            <form id="{{ form_name }}" class="form-dinamico" style="display: none;" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="hidden" name="form_name" value="{{ form_name }}">
+                <button type="submit">Cadastrar</button>
+            </form>
+        {% endfor %}
+    </div>
+
+    <!-- Modal de Mensagens -->
+    <div id="modalMensagem" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="modalMensagemTexto"></p>
+        </div>
+    </div>
+{% else %}
+    <p>Sistema de controle de acesso para o IFPI</p>
+    <a href="{% url 'login' %}">Login</a> ou <a href="{% url 'register_admin' %}">Cadastrar Administrador</a>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if user.is_authenticated %}
+<script>
+function atualizarRelogio() {
+    const agora = new Date();
+    const horas = String(agora.getHours()).padStart(2, '0');
+    const minutos = String(agora.getMinutes()).padStart(2, '0');
+    const segundos = String(agora.getSeconds()).padStart(2, '0');
+    const data = agora.toLocaleDateString('pt-BR');
+    document.getElementById('relogio').textContent = `🕒 ${horas}:${minutos}:${segundos} - 📅 ${data}`;
+}
+
+setInterval(atualizarRelogio, 1000);
+atualizarRelogio();
+
+function mostrarFormulario(formId) {
+    const formularios = document.querySelectorAll('.form-dinamico');
+    formularios.forEach(form => form.style.display = 'none');
+    document.getElementById(formId).style.display = 'block';
+}
+
+// Modal de Mensagens
+const modal = document.getElementById('modalMensagem');
+const span = document.getElementsByClassName('close')[0];
+
+span.onclick = function() {
+    modal.style.display = 'none';
+}
+
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+
+{% if messages %}
+    const modalMensagemTexto = document.getElementById('modalMensagemTexto');
+    {% for message in messages %}
+        modalMensagemTexto.innerHTML += '{{ message.tags }}: {{ message }}<br>';
+    {% endfor %}
+    modal.style.display = 'block';
+{% endif %}
+</script>
+{% endif %}
 {% endblock %}

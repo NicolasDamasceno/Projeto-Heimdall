@@ -59,7 +59,7 @@ class Usuario(PolymorphicModel):
     
 
 class Curso(models.Model):
-    nome = models.CharField(max_length=100, unique=True)
+    nome = models.CharField(max_length=100, unique=False)
     turno = models.CharField(
         max_length=20,
         choices=[

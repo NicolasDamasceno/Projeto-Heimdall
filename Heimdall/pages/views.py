@@ -183,7 +183,7 @@ def listar_entradas(request):
 
 
 def exportar_entradas(request):
-    today = localtime(now()).date()
+    today = timezone.now().date()
     entradas = Entrada.objects.select_related('id_usuario', 'dispositivo').filter(data_entrada__date=today)
 
     response = HttpResponse(content_type='text/csv')
@@ -193,9 +193,29 @@ def exportar_entradas(request):
     writer.writerow(['Usuário', 'Matrícula', 'Dispositivo', 'Data'])
 
     for entrada in entradas:
-        matricula = entrada.id_usuario.aluno.matricula if hasattr(entrada.id_usuario, 'aluno') else '---'
-        writer.writerow([entrada.id_usuario.nome, matricula, entrada.dispositivo.localizacao, localtime(entrada.data_entrada).strftime('%d/%m/%Y %H:%M')])
-
+        usuario = entrada.id_usuario.get_real_instance()  # Garante que pega a instância real (Aluno, Docente, ou Visitante)
+        
+        if isinstance(usuario, Aluno):
+            matricula = usuario.matricula
+        elif isinstance(usuario, Docente):
+            matricula = 'Docente'
+        elif isinstance(usuario, Visitante):
+            matricula = 'Visitante'
+        else:
+            matricula = 'Desconhecido'
+        
+        # Formata a data corretamente
+        data_entrada = entrada.data_entrada
+        if timezone.is_naive(data_entrada):
+            data_entrada = timezone.make_aware(data_entrada, timezone.get_current_timezone())
+        
+        writer.writerow([
+            usuario.nome,
+            matricula,
+            entrada.dispositivo.localizacao,
+            timezone.localtime(data_entrada).strftime('%d/%m/%Y %H:%M')
+        ])
+    
     return response
 
 

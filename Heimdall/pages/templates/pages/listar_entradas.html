@@ -48,6 +48,8 @@
             <td>
                 {% if entrada.id_usuario.polymorphic_ctype.model == 'aluno' %}
                     {{ entrada.id_usuario.aluno.matricula }}
+                {% elif entrada.id_usuario.polymorphic_ctype.model == 'docente' %}
+                    Docente
                 {% else %}
                     Visitante
                 {% endif %}

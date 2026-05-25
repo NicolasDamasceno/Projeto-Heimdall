@@ -30,7 +30,7 @@
 
     <button type="submit">Filtrar</button>
     <a href="{% url 'listar_entradas' %}" class="button">Limpar Filtros</a>
-    <a href="{% url 'exportar_csv' %}" class="button">Exportar CSV</a>
+    <a href="{% url 'exportar_csv' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="button">Exportar CSV</a>
 </form>
 
 <div class="table-container">

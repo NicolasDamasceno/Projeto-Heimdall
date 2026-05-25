@@ -21,6 +21,35 @@ import pytz
 
 logger = logging.getLogger(__name__)
 
+def aplicar_filtros_entradas(request, entradas):
+    hoje = timezone.now().date()
+    data_inicial = request.GET.get('data_inicial')
+    data_final = request.GET.get('data_final')
+
+    if data_inicial or data_final:
+        data_inicio = datetime.strptime(data_inicial, "%Y-%m-%d") if data_inicial else hoje
+        data_fim = datetime.strptime(data_final, "%Y-%m-%d") + timedelta(days=1) - timedelta(seconds=1) if data_final else data_inicio + timedelta(days=1) - timedelta(seconds=1)
+        entradas = entradas.filter(data_entrada__range=(data_inicio, data_fim))
+
+    nome = request.GET.get('nome')
+    matricula = request.GET.get('matricula')
+    dispositivo = request.GET.get('dispositivo')
+    tipo_usuario = request.GET.get('tipo_usuario')
+
+    if nome:
+        entradas = entradas.filter(id_usuario__nome__icontains=nome)
+    if matricula:
+        entradas = entradas.filter(id_usuario__aluno__matricula__icontains=matricula)
+    if dispositivo:
+        entradas = entradas.filter(dispositivo__localizacao__icontains=dispositivo)
+    if tipo_usuario:
+        if tipo_usuario == 'estudante':
+            entradas = entradas.filter(id_usuario__polymorphic_ctype__model='aluno')
+        elif tipo_usuario == 'visitante':
+            entradas = entradas.filter(id_usuario__polymorphic_ctype__model='visitante')
+
+    return entradas
+
 def obter_hora_local():
     fuso_horario = pytz.timezone('America/Fortaleza')
     return datetime.now(fuso_horario)
@@ -138,38 +167,8 @@ def validar_entrada(request):
 
 
 def listar_entradas(request):
-    hoje = timezone.now().date()
     entradas = Entrada.objects.select_related('id_usuario', 'dispositivo').all().order_by('-data_entrada')
-
-    # Filtro por período
-    data_inicial = request.GET.get('data_inicial')
-    data_final = request.GET.get('data_final')
-
-    if data_inicial or data_final:
-        data_inicio = datetime.strptime(data_inicial, "%Y-%m-%d") if data_inicial else hoje
-        data_fim = datetime.strptime(data_final, "%Y-%m-%d") + timedelta(days=1) - timedelta(seconds=1) if data_final else data_inicio + timedelta(days=1) - timedelta(seconds=1)
-        entradas = entradas.filter(data_entrada__range=(data_inicio, data_fim))
-    else:
-        # Filtro padrão: exibir apenas as entradas do dia atual
-        entradas = entradas.filter(data_entrada__date=hoje)
-
-    # Outros filtros
-    nome = request.GET.get('nome')
-    matricula = request.GET.get('matricula')
-    dispositivo = request.GET.get('dispositivo')
-    tipo_usuario = request.GET.get('tipo_usuario')
-
-    if nome:
-        entradas = entradas.filter(id_usuario__nome__icontains=nome)
-    if matricula:
-        entradas = entradas.filter(id_usuario__aluno__matricula__icontains=matricula)
-    if dispositivo:
-        entradas = entradas.filter(dispositivo__localizacao__icontains=dispositivo)
-    if tipo_usuario:
-        if tipo_usuario == 'estudante':
-            entradas = entradas.filter(id_usuario__polymorphic_ctype__model='aluno')
-        elif tipo_usuario == 'visitante':
-            entradas = entradas.filter(id_usuario__polymorphic_ctype__model='visitante')
+    entradas = aplicar_filtros_entradas(request, entradas)
 
     paginator = Paginator(entradas, 10)
     page_number = request.GET.get('page')
@@ -183,8 +182,8 @@ def listar_entradas(request):
 
 
 def exportar_entradas(request):
-    today = timezone.now().date()
-    entradas = Entrada.objects.select_related('id_usuario', 'dispositivo').filter(data_entrada__date=today)
+    entradas = Entrada.objects.select_related('id_usuario', 'dispositivo').all().order_by('-data_entrada')
+    entradas = aplicar_filtros_entradas(request, entradas)
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="entradas.csv"'

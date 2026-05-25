@@ -1,37 +1,33 @@
-# Arquivos do Python
-*.pyc
-*.pyo
+# Byte-compiled / cache
 __pycache__/
+*.py[cod]
 
-# Configurações do ambiente virtual
+# Ambiente virtual
 venv/
 .env
 *.env
 
-# Arquivos de banco de dados local
+# Banco de dados local
 db.sqlite3
 *.sqlite3
 
-# Arquivos de migrações do Django
-migrations/
-*/migrations/*.py
-*/migrations/*.pyc
+# VS Code / IDEs
+.vscode/
+.idea/
 
-# Arquivos de mídia e uploads
+# Arquivos de mídia e estáticos gerados
 media/
 staticfiles/
 
-# Arquivos de configuração e logs
+# Logs e temporários
 *.log
-*.pot
-*.pyc
+*.tmp
+*.bak
 *.swp
 
-# Arquivos de cache
+# Cache
 .cache/
-*.bak
-*.tmp
-.DS_Store
 
-# Arquivos relacionados ao sistema operacional
+# Sistema operacional
+.DS_Store
 Thumbs.db

@@ -1,4 +1,4 @@
-# 🛡️ Heimdall — Software de Controle de Acesso
+# Heimdall — Software de Controle de Acesso
 
 Sistema web de controle de acesso desenvolvido como **Projeto Integrador** no curso de **Técnico em Desenvolvimento de Sistemas** do **IFPI Campus Teresina Central**, com o objetivo de aumentar a segurança institucional por meio da identificação digital de alunos, docentes e visitantes.
 
@@ -17,7 +17,7 @@ Sistema web de controle de acesso desenvolvido como **Projeto Integrador** no cu
 
 ---
 
-## 📋 Sobre o Projeto
+## Sobre o Projeto
 
 O Heimdall surgiu da necessidade identificada no próprio IFPI: alunos frequentemente acessavam a instituição sem apresentar identificação ao porteiro. A solução desenvolvida permite que a equipe de segurança verifique, em tempo real, se uma pessoa está cadastrada no sistema — através de busca por **nome**, **CPF** ou **matrícula** — e registra automaticamente cada entrada com data e horário.
 
@@ -57,9 +57,9 @@ Heimdall/
 
 ---
 
-## 🏗️ Arquitetura e Conceitos Aplicados
+## Arquitetura e Conceitos Aplicados
 
-### 🔷 Herança com Polimorfismo (django-polymorphic)
+### Herança com Polimorfismo (django-polymorphic)
 
 O modelo central do sistema é `Usuario`, que herda de `PolymorphicModel` da biblioteca **django-polymorphic**. As subclasses `Aluno`, `Docente` e `Visitante` estendem essa classe base com atributos específicos:
 
@@ -92,7 +92,7 @@ if not usuario:
     usuario = Usuario.objects.filter(aluno__matricula=cpf_ou_matricula).first()
 ```
 
-### 🔷 Encapsulamento e Validação
+### Encapsulamento e Validação
 
 A validação de CPF é encapsulada diretamente no modelo `Usuario`, usando a biblioteca **validate-docbr**, garantindo que dados inválidos nunca cheguem ao banco:
 
@@ -105,7 +105,7 @@ def clean(self):
 
 A validação de matrícula (15 dígitos) também é encapsulada em `Aluno.clean()`, seguindo o mesmo princípio.
 
-### 🔷 Associação entre Modelos (ForeignKey)
+### Associação entre Modelos (ForeignKey)
 
 Os modelos se relacionam por meio de chaves estrangeiras, refletindo a modelagem do banco de dados:
 
@@ -115,7 +115,7 @@ Entrada  →  Dispositivo (por qual catraca/computador)
 Aluno    →  Curso       (em qual curso está matriculado)
 ```
 
-### 🔷 Class-Based View (CBV)
+### Class-Based View (CBV)
 
 A tela principal utiliza uma **Class-Based View** com `TemplateView`, separando os métodos `GET` (exibição do dashboard) e `POST` (cadastro via formulário modal):
 
@@ -129,13 +129,13 @@ class PaginaInicial(TemplateView):
         ...
 ```
 
-### 🔷 Autenticação e Controle de Acesso
+### Autenticação e Controle de Acesso
 
 O sistema usa o sistema de autenticação nativo do Django (`django.contrib.auth`), com acesso restrito apenas a usuários `is_staff`. O decorator `@login_required` protege rotas sensíveis como histórico e exportação.
 
 ---
 
-## ⚙️ Funcionalidades
+## Funcionalidades
 
 | Rota | Funcionalidade |
 |------|---------------|
@@ -152,7 +152,7 @@ O sistema usa o sistema de autenticação nativo do Django (`django.contrib.auth
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 **Back-End**
 - [Python 3](https://www.python.org/) + [Django 5.1.4](https://www.djangoproject.com/)
@@ -171,7 +171,7 @@ O sistema usa o sistema de autenticação nativo do Django (`django.contrib.auth
 
 ---
 
-## 🗃️ Modelo de Dados
+## Modelo de Dados
 
 ```
 USUARIO (base polimórfica)
@@ -240,7 +240,7 @@ O relatório completo do projeto integrador, contendo problemática, metodologia
 
 ---
 
-## 📚 Referências
+## Referências
 
 - [Django Documentation](https://docs.djangoproject.com/)
 - [Django-Polymorphic Documentation](https://django-polymorphic.readthedocs.io/)
